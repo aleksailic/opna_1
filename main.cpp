@@ -42,12 +42,13 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <prettyprint.hpp>
+#else
 #endif
 
 #include <fort.hpp>
 
 static constexpr auto kVersion = "v0.1.0";
-static constexpr auto kProgramName = "OPNA_1: Continual Fraction Generator";
+static constexpr auto kProgramName = "OPNA_1: Continued Fraction Generator";
 static constexpr auto kUnderlineType = '=';
 
 // -- CHANGE THESE TYPES FOR MORE PRECISION
@@ -60,8 +61,10 @@ using DecimalNumber = std::tuple<IntType, FloatType>;
 struct Config {
     size_t precision;
     size_t iterations;
+    IntType max_denominator;
+    bool find_in_between;
 };
-static constexpr Config kDefaultConfig{14, 14};
+static const Config kDefaultConfig{14, 14, std::numeric_limits<IntType>::max(), false};
 
 std::ostream &operator<<(std::ostream &os, const DecimalNumber &number) {
     return os << '(' << std::get<0>(number) << ',' << std::get<1>(number) << ')';
@@ -213,7 +216,7 @@ FindInBetweenApproximations(FloatType number_searched, std::vector<DecimalNumber
 }
 
 std::vector<EvaluatedIteration>
-EvaluateDecimalNumber(DecimalNumber number, size_t iterations, bool find_in_between = false) {
+EvaluateDecimalNumber(DecimalNumber number, Config config) {
     const auto number_searched = FloatType(std::get<0>(number)) + FloatType(std::get<1>(number));
     std::vector<DecimalNumber> indices = ContinuedFractionIndices(number, 1);
     std::vector<EvaluatedIteration> evaluated_iterations;
@@ -224,20 +227,29 @@ EvaluateDecimalNumber(DecimalNumber number, size_t iterations, bool find_in_betw
             {indices, fraction, evaluated_fraction, number_searched - evaluated_fraction, EvaluatedType::I});
 
     try {
-        for (int i = 2; i <= iterations; i++) {
+        for (int i = 2; i <= config.iterations; i++) {
             ContinuedFractionIndices(indices, i);
             auto evaluated_iteration = EvaluateIteration(number_searched, indices, EvaluatedType::I);
             if (mp::abs(evaluated_iteration.diff) > mp::abs(evaluated_iterations.back().diff)) {
                 throw std::logic_error(
                         "More iterations result in bigger deviation. Compile with larger integer and/or floating point types.");
             }
-            if (find_in_between) {
+            if (config.find_in_between) {
                 auto in_between_aproximations = FindInBetweenApproximations(number_searched, indices,
                                                                             evaluated_iterations.back().diff);
                 evaluated_iterations.insert(evaluated_iterations.end(), in_between_aproximations.begin(),
                                             in_between_aproximations.end());
             }
             evaluated_iterations.push_back(evaluated_iteration);
+            if (evaluated_iterations.back().fraction.denominator() > config.max_denominator) {
+                evaluated_iterations.erase(std::lower_bound(evaluated_iterations.begin(), evaluated_iterations.end(),
+                                                            config.max_denominator,
+                                                            [](const auto &iteration, const auto &max_denominator) {
+                                                                return iteration.fraction.denominator() <=
+                                                                       max_denominator;
+                                                            }), evaluated_iterations.end());
+                break;
+            }
         }
     } catch (const std::range_error &err) {
         std::cerr << err.what() << " Stopped at iteration: " << indices.size() << std::endl;
@@ -320,6 +332,7 @@ TEST_CASE("ParseDecimalNumber") {
     REQUIRE_THROWS(ParseDecimalNumber("NaN"));
 }
 #else
+
 int main(int argc, const char *argv[]) {
     namespace po = boost::program_options;
 
@@ -335,7 +348,9 @@ int main(int argc, const char *argv[]) {
             ("version", "print version information")
             ("examples", "show examples")
             ("table", "print evaluation table of every iteration")
-            ("inbetween", "show best in-between continual fraction approximations also")
+            ("maxdenominator", po::value<IntType>(&config.max_denominator),
+             "maximum denominator up to which to iterate")
+            ("inbetween", "show best in-between continual fraction approximations as well")
             ("iterations", po::value<size_t>(&config.iterations)->default_value(kDefaultConfig.iterations),
              "number of iterations")
             ("precision", po::value<size_t>(&config.precision)->default_value(kDefaultConfig.precision),
@@ -377,7 +392,11 @@ int main(int argc, const char *argv[]) {
                 std::make_tuple("pi",
                                 "Evaluates pi with default (" + std::to_string(config.iterations) + ") iterations"),
                 std::make_tuple("pi --table --iterations 5 --precision 10",
-                                "Print evaluation table with 5 iterations and up to 10 decimal places for pi expansion")
+                                "Print evaluation table with 5 iterations and up to 10 decimal places for pi expansion"),
+                std::make_tuple("phi --table --maxdenominator 400 --inbetween",
+                                "Print evaluation table for phi where maximum fraction approximation denominator is less than or equal to 400"),
+                std::make_tuple("phi --table --inbetween",
+                                "Print evaluation table for phi with default (" + std::to_string(config.iterations) + ") iterations and also find best in-between approximations")
         };
 
         table << fort::header
@@ -397,7 +416,11 @@ int main(int argc, const char *argv[]) {
         return 1;
     }
 
-    auto evaluated_iterations = EvaluateDecimalNumber(ParseDecimalNumber(number), config.iterations, vm.count("inbetween"));
+    if (vm.count("inbetween")){
+        config.find_in_between = true;
+    }
+
+    auto evaluated_iterations = EvaluateDecimalNumber(ParseDecimalNumber(number), config);
     if (vm.count("table")) {
         PrintEvaluationTable(evaluated_iterations, config.precision);
     } else {
@@ -417,4 +440,5 @@ int main(int argc, const char *argv[]) {
         std::cout << table.to_string();
     }
 }
+
 #endif

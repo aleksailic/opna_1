@@ -11,4 +11,7 @@ add_subdirectory(libs/libfort)
 
 add_executable(opna_1 main.cpp)
 target_link_libraries(opna_1 PRIVATE ${Boost_LIBRARIES} fort)
-add_compile_definitions(TESTING_ENABLED)
+
+add_executable(opna_1_tests main.cpp)
+target_link_libraries(opna_1_tests PRIVATE ${Boost_LIBRARIES} fort)
+target_compile_definitions(opna_1_tests PRIVATE TESTING_ENABLED)
