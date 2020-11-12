@@ -253,7 +253,7 @@ EvaluateDecimalNumber(DecimalNumber number, size_t iterations, bool find_in_betw
 static const char *GetProgramName(const char *path) {
     const char *last = path;
     while (*path++) {
-        last = (*path == '/') ? path : last;
+        last = (*path == '/' || *path == '\\') ? path : last;
     }
     return last;
 }
@@ -261,11 +261,12 @@ static const char *GetProgramName(const char *path) {
 #ifdef TESTING_ENABLED
 TEST_CASE("GetProgramName") {
     constexpr auto kExamplePath1 = "/home/ilic/opna-1/opna_1";
-    constexpr auto kExamplePath2 = "/opna_1";
-    constexpr auto kExpectedName = "/opna_1";
+    constexpr auto kExamplePath2 = "C:\\Users\\My Documents\\opna_1";
+    constexpr auto kExpectedName1 = "/opna_1";
+    constexpr auto kExpectedName2 = "\\opna_1";
 
-    REQUIRE(strcmp(GetProgramName(kExamplePath1), kExpectedName) == 0);
-    REQUIRE(strcmp(GetProgramName(kExamplePath2), kExpectedName) == 0);
+    REQUIRE(strcmp(GetProgramName(kExamplePath1), kExpectedName1) == 0);
+    REQUIRE(strcmp(GetProgramName(kExamplePath2), kExpectedName2) == 0);
 }
 TEST_CASE("ContinuedFractionEvaluator") {
     const auto kExampleNumber = boost::math::constants::pi<FloatType>();
