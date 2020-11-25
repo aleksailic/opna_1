@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(opna_1)
 set(CMAKE_CXX_STANDARD 17)
+set(Boost_USE_STATIC_LIBS ON)
 
 include_directories(libs/catch)
 include_directories(libs/prettyprint)
