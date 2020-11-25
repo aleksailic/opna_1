@@ -18,6 +18,10 @@ Allowed options:
   --version              print version information
   --examples             show examples
   --table                print evaluation table of every iteration
+  --table_style arg      Specify table style: nice|double|simple|empty
+  --headerless           Do not display header when showing results
+  --fields arg           Comma delimited list of fields to be shown: 
+                         iter,ind,frac,eval,diff
   --maxdenominator arg   maximum denominator up to which to iterate
   --inbetween            show best in-between continual fraction approximations
                          as well
