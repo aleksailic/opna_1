@@ -27,7 +27,7 @@ Allowed options:
 
 Allowed constants: pi, phi, e 
 ```
-###Examples
+### Examples
 ```
     Command                                                Description                                                                                                  
  1  ./opna_1 pi                                            Evaluates pi with default (14) iterations                                                                    
