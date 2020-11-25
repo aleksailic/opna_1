@@ -557,8 +557,6 @@ int main(int argc, const char *argv[]) {
 
         fort::char_table table;
         table.set_border_style(config.table_style);
-        table << fort::header
-              << "Iterations" << "Indices" << "Fraction" << "Evaluated Fraction" << "Difference" << fort::endr;
         PrintEvaluationTableHeader(table, config);
         PrintEvaluatedIteration(table, eval, config);
 
