@@ -125,6 +125,8 @@ DecimalNumber ParseDecimalNumber(std::string number) {
         return ParseDecimalNumber(boost::math::constants::phi<FloatType>());
     } else if (number == "e") {
         return ParseDecimalNumber(boost::math::constants::e<FloatType>());
+    } else if (number == "catalan") {
+        return ParseDecimalNumber(boost::math::constants::catalan<FloatType>());
     }
 
     auto dot_index = number.find('.');
@@ -256,12 +258,15 @@ void PrintEvaluationTable(const std::vector<EvaluatedIteration> &iterations, con
     fort::char_table table;
     table.set_border_style(config.table_style);
 
+    auto diff_it = std::find(config.displayed_fields.begin(), config.displayed_fields.end(), Field::DIFFERENCE);
     PrintEvaluationTableHeader(table, config);
 
     size_t counter = 1;
     for (const auto &iteration : iterations) {
         PrintEvaluatedIteration(table, iteration, config);
-        table[counter++][4].set_cell_text_align(fort::text_align::right);
+        if(diff_it != config.displayed_fields.end()){
+            table[counter++][std::distance(config.displayed_fields.begin(), diff_it)].set_cell_text_align(fort::text_align::right);
+        }
     }
 
     std::cout << table.to_string();
