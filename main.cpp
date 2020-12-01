@@ -47,7 +47,7 @@
 
 static constexpr auto kVersion = "v0.2.0";
 static constexpr auto kProgramName = "OPNA_1: Continued Fraction Generator";
-static constexpr auto kUnderlineType = '=';
+static constexpr auto kUnderlineType = '-';
 
 // -- CHANGE THESE TYPES FOR MORE PRECISION
 namespace mp = boost::multiprecision;
@@ -472,7 +472,7 @@ int main(int argc, const char *argv[]) {
         std::cout << name_header.str() << "\n"
                   << underline << "\n"
                   << "Integer type w/: " << std::numeric_limits<IntType>::digits << "bits\n"
-                  << "Floating type w/: " << std::numeric_limits<FloatType>::digits << "bits\n";
+                  << "Floating type w/: " << std::numeric_limits<FloatType>::digits10 << "digits\n";
         return 0;
     }
 
