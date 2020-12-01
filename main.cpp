@@ -459,7 +459,7 @@ int main(int argc, const char *argv[]) {
     if (vm.count("help")) {
         std::cout << "Usage: ." << program_name << " [OPTIONS] <NUMBER|CONSTANT> \n"
                   << desc << '\n'
-                  << "Allowed constants: pi, phi, e \n";
+                  << "Allowed constants: pi, phi, e, catalan \n";
         return 0;
     }
 
