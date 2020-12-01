@@ -45,7 +45,7 @@
 
 #include <fort.hpp>
 
-static constexpr auto kVersion = "v0.2.0";
+static constexpr auto kVersion = "v0.2.1";
 static constexpr auto kProgramName = "OPNA_1: Continued Fraction Generator";
 static constexpr auto kUnderlineType = '-';
 
